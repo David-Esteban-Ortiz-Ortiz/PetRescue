@@ -15,6 +15,12 @@ class Reporte extends Model
     protected $fillable = [
         'mascota_id',
         'usuario_reportante_id',
+        'nombre_contacto',
+        'telefono_contacto',
+        'correo_contacto',
+        'medio_contacto_preferido',
+        'codigo_reporte',
+        'codigo_edicion',
         'tipo_reporte',
         'fecha_suceso',
         'hora_aproximada',
@@ -27,6 +33,10 @@ class Reporte extends Model
         'estado',
         'fecha_publicacion',
         'fecha_cierre',
+    ];
+
+    protected $hidden = [
+        'codigo_edicion',
     ];
 
     protected function casts(): array

@@ -19,27 +19,32 @@
                 </h1>
 
                 <p class="lead mt-3 mb-4">
-                    Publica reportes de mascotas perdidas o encontradas
-                    y contribuye a reunirlas con sus familias.
+                    Publica una mascota perdida o encontrada sin necesidad
+                    de crear una cuenta. Ayúdanos a reunirlas con sus familias.
                 </p>
 
                 <div class="d-flex flex-wrap gap-3">
                     <a
-                        href="{{ route('login') }}"
+                        href="{{ route('reportes.perdida') }}"
                         class="btn btn-pet-primary"
                     >
-                        <i class="bi bi-box-arrow-in-right me-1"></i>
-                        Iniciar sesión
+                        <i class="bi bi-search-heart me-1"></i>
+                        Reportar mascota perdida
                     </a>
 
                     <a
-                        href="{{ route('registro') }}"
+                        href="{{ route('reportes.hallazgo') }}"
                         class="btn btn-light rounded-pill px-4 py-2"
                     >
-                        <i class="bi bi-person-plus me-1"></i>
-                        Crear cuenta
+                        <i class="bi bi-geo-alt-fill me-1"></i>
+                        Reportar mascota encontrada
                     </a>
                 </div>
+
+                <p class="small mt-3 mb-0">
+                    <i class="bi bi-info-circle me-1"></i>
+                    No necesitas registrarte ni iniciar sesión.
+                </p>
             </div>
 
             <div class="col-lg-5">
@@ -73,11 +78,12 @@
                     <hr>
 
                     <div class="d-flex gap-3">
-                        <i class="bi bi-people fs-2 text-success"></i>
+                        <i class="bi bi-pencil-square fs-2 text-success"></i>
                         <div>
-                            <h3 class="h6 fw-bold">Participa en la comunidad</h3>
+                            <h3 class="h6 fw-bold">Actualiza tu contacto</h3>
                             <p class="text-secondary mb-0">
-                                Consulta y comparte los reportes publicados.
+                                Con tus códigos puedes editar la información
+                                de contacto de tu reporte.
                             </p>
                         </div>
                     </div>

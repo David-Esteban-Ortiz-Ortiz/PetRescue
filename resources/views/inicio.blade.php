@@ -12,8 +12,8 @@
             </h1>
 
             <p class="lead text-secondary mb-0">
-                Publica un nuevo reporte o consulta las mascotas reportadas
-                por la comunidad.
+                Publica una mascota perdida o encontrada sin necesidad
+                de crear una cuenta.
             </p>
         </div>
 
@@ -77,6 +77,33 @@
 
     </div>
 
+    <div class="row g-4 mb-5">
+        <div class="col-12">
+            <div class="pet-card bg-white p-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+                <div class="d-flex align-items-center gap-3">
+                    <i class="bi bi-pencil-square fs-1 text-primary"></i>
+                    <div>
+                        <h2 class="h5 fw-bold mb-1">
+                            ¿Ya publicaste un reporte?
+                        </h2>
+                        <p class="text-secondary mb-0">
+                            Actualiza la información de contacto de tu reporte
+                            usando tus códigos.
+                        </p>
+                    </div>
+                </div>
+
+                <a
+                    href="{{ route('reportes.actualizar-contacto') }}"
+                    class="btn btn-pet-secondary rounded-pill px-4"
+                >
+                    <i class="bi bi-shield-lock me-1"></i>
+                    Actualizar información de contacto
+                </a>
+            </div>
+        </div>
+    </div>
+
     <div
         class="d-flex flex-column flex-md-row
                justify-content-between align-items-md-end
@@ -116,6 +143,7 @@
         <button
             type="button"
             class="btn btn-pet-secondary btn-sm px-4"
+            data-filtro="todos"
         >
             Todos
         </button>
@@ -123,6 +151,7 @@
         <button
             type="button"
             class="btn btn-outline-danger rounded-pill btn-sm px-4"
+            data-filtro="perdida"
         >
             Mascotas perdidas
         </button>
@@ -130,6 +159,7 @@
         <button
             type="button"
             class="btn btn-outline-success rounded-pill btn-sm px-4"
+            data-filtro="encontrada"
         >
             Mascotas encontradas
         </button>
@@ -143,6 +173,7 @@
                 data-nombre="{{ strtolower($reporte['nombre']) }}"
                 data-tipo="{{ strtolower($reporte['tipo']) }}"
                 data-ubicacion="{{ strtolower($reporte['ubicacion']) }}"
+                data-estado="{{ strtolower($reporte['estado']) }}"
             >
                 <article class="card pet-card h-100">
 
@@ -185,7 +216,7 @@
                         </p>
 
                         <a
-                            href="#"
+                            href="{{ route('reportes.detalle', $reporte['codigo_reporte']) }}"
                             class="btn btn-pet-secondary btn-sm mt-auto"
                         >
                             <i class="bi bi-eye me-1"></i>
@@ -211,7 +242,7 @@
         id="mensajeSinResultados"
     >
         <i class="bi bi-exclamation-circle me-2"></i>
-        No se encontraron reportes con la búsqueda ingresada.
+        No se encontraron reportes con la búsqueda o el filtro seleccionado.
     </div>
 
 </section>
@@ -223,26 +254,35 @@
         const buscador = document.getElementById('buscadorReportes');
         const reportes = document.querySelectorAll('.reporte-item');
         const mensajeSinResultados = document.getElementById('mensajeSinResultados');
+        const botonesFiltro = document.querySelectorAll('[data-filtro]');
 
-        if (!buscador) {
-            return;
-        }
+        let filtroActivo = 'todos';
 
-        buscador.addEventListener('input', function () {
-            const textoBusqueda = buscador.value.toLowerCase().trim();
+        function aplicarFiltros() {
+            const textoBusqueda = buscador ? buscador.value.toLowerCase().trim() : '';
             let resultadosVisibles = 0;
 
             reportes.forEach(function (reporte) {
                 const nombre = reporte.dataset.nombre;
                 const tipo = reporte.dataset.tipo;
                 const ubicacion = reporte.dataset.ubicacion;
+                const estado = reporte.dataset.estado;
 
-                const coincide =
+                const coincideTexto =
+                    textoBusqueda === '' ||
                     nombre.includes(textoBusqueda) ||
                     tipo.includes(textoBusqueda) ||
                     ubicacion.includes(textoBusqueda);
 
-                if (coincide) {
+                let coincideFiltro = true;
+
+                if (filtroActivo === 'perdida') {
+                    coincideFiltro = estado === 'perdida';
+                } else if (filtroActivo === 'encontrada') {
+                    coincideFiltro = estado === 'encontrada';
+                }
+
+                if (coincideTexto && coincideFiltro) {
                     reporte.classList.remove('d-none');
                     resultadosVisibles++;
                 } else {
@@ -250,11 +290,22 @@
                 }
             });
 
-            if (resultadosVisibles === 0 && textoBusqueda !== '') {
+            if (resultadosVisibles === 0) {
                 mensajeSinResultados.classList.remove('d-none');
             } else {
                 mensajeSinResultados.classList.add('d-none');
             }
+        }
+
+        if (buscador) {
+            buscador.addEventListener('input', aplicarFiltros);
+        }
+
+        botonesFiltro.forEach(function (boton) {
+            boton.addEventListener('click', function () {
+                filtroActivo = boton.dataset.filtro;
+                aplicarFiltros();
+            });
         });
     });
 </script>

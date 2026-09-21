@@ -58,31 +58,11 @@
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('perfil') }}">
-                            <i class="bi bi-person-circle"></i>
-                            Perfil
+                        <a class="nav-link" href="{{ route('reportes.actualizar-contacto') }}">
+                            <i class="bi bi-pencil-square"></i>
+                            Actualizar contacto
                         </a>
                     </li>
-
-                    @auth
-                        <li class="nav-item">
-                            <form action="{{ route('logout') }}" method="POST" class="d-inline">
-                                @csrf
-                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill ms-lg-2">
-                                    <i class="bi bi-box-arrow-right me-1"></i>
-                                    Cerrar sesión
-                                </button>
-                            </form>
-                        </li>
-                    @endauth
-
-                    @guest
-                        <li class="nav-item">
-                            <a class="btn btn-pet-primary btn-sm px-3" href="{{ route('login') }}">
-                                Iniciar sesión
-                            </a>
-                        </li>
-                    @endguest
                 </ul>
             </div>
         </div>
