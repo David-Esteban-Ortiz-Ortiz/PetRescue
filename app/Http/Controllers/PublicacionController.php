@@ -3,16 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\Publicacion;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\View\View;
 use Throwable;
 
 class PublicacionController extends Controller
 {
-    public function index()
+    public function index(): View
     {
         $publicaciones = Publicacion::where('estado', 'Visible')
             ->orderByDesc('fecha_publicacion')
@@ -22,12 +24,12 @@ class PublicacionController extends Controller
         return view('comunidad.index', compact('publicaciones'));
     }
 
-    public function crear()
+    public function crear(): View
     {
         return view('comunidad.crear');
     }
 
-    public function guardar(Request $request)
+    public function guardar(Request $request): RedirectResponse
     {
         // 1. Validación
         $datos = $request->validate([
@@ -94,7 +96,7 @@ class PublicacionController extends Controller
             ->with('exito', 'Publicación creada correctamente.');
     }
 
-    public function detalle(string $codigoPublicacion)
+    public function detalle(string $codigoPublicacion): View|RedirectResponse
     {
         $publicacion = Publicacion::where('codigo_publicacion', $codigoPublicacion)->first();
 
@@ -104,6 +106,6 @@ class PublicacionController extends Controller
                 ->withErrors(['publicacion' => 'La publicación solicitada no existe.']);
         }
 
-        return view('comunidad.detalle', compact('publicacion'));
+        return view('comunidad.detalle', compact('publicacion', 'codigoPublicacion'));
     }
 }
