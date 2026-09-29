@@ -42,7 +42,12 @@
                             Inicio
                         </a>
                     </li>
-
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('comunidad.index') }}">
+                            <i class="bi bi-people-fill"></i>
+                            Comunidad
+                        </a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('reportes.perdida') }}">
                             <i class="bi bi-search"></i>

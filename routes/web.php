@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\PetRescueController;
+use App\Http\Controllers\PublicacionController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [PetRescueController::class, 'bienvenida'])
@@ -35,3 +36,17 @@ Route::put('/reportes/{codigoReporte}/contacto', [PetRescueController::class, 'a
 
 Route::get('/reportes/{codigoReporte}', [PetRescueController::class, 'mostrarReporte'])
     ->name('reportes.detalle');
+
+Route::prefix('comunidad')->name('comunidad.')->group(function () {
+    Route::get('/', [PublicacionController::class, 'index'])
+        ->name('index');
+
+    Route::get('/publicar', [PublicacionController::class, 'crear'])
+        ->name('crear');
+
+    Route::post('/publicaciones', [PublicacionController::class, 'guardar'])
+        ->name('guardar');
+
+    Route::get('/publicaciones/{codigoPublicacion}', [PublicacionController::class, 'detalle'])
+        ->name('detalle');
+});
