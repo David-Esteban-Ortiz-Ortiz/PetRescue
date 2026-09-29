@@ -101,7 +101,7 @@ class PublicacionController extends Controller
         if (! $publicacion) {
             return redirect()
                 ->route('comunidad.index')
-                ->with('error', 'La publicación solicitada no existe.');
+                ->withErrors(['publicacion' => 'La publicación solicitada no existe.']);
         }
 
         return view('comunidad.detalle', compact('publicacion'));
