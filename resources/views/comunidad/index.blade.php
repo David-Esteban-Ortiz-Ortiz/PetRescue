@@ -17,8 +17,7 @@
             </h1>
 
             <p class="lead text-secondary mb-0">
-                Comparte consejos, experiencias e historias relacionadas
-                con el cuidado y bienestar de las mascotas.
+                Comparte consejos, historias y experiencias relacionadas con el cuidado y bienestar de las mascotas.
             </p>
         </div>
 
