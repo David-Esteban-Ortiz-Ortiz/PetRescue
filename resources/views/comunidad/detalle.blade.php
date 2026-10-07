@@ -33,7 +33,7 @@
                         </span>
 
                         <strong class="text-primary fs-5">
-                            {{ $codigoPublicacion }}
+                            {{ $publicacion->codigo_publicacion }}
                         </strong>
                     </div>
 
@@ -52,12 +52,12 @@
                     </div>
 
                     <h2 class="h4 fw-bold mb-2">
-                        Publicación seleccionada
+                        {{ $publicacion->titulo }}
                     </h2>
 
                     <p class="text-secondary mb-0">
-                        Esta vista está preparada para mostrar la información
-                        completa cuando el servicio de comunidad entregue los datos.
+                        Publicado el
+                        {{ $publicacion->fecha_publicacion->format('d/m/Y \a \l\a\s H:i') }}
                     </p>
 
                 </div>
@@ -78,7 +78,7 @@
                             </div>
 
                             <p class="text-secondary mb-0">
-                                Información aún no disponible.
+                                {{ $publicacion->tipo_publicacion }}
                             </p>
 
                         </div>
@@ -97,26 +97,26 @@
                             </div>
 
                             <p class="text-secondary mb-0">
-                                Información aún no disponible.
+                                {{ $publicacion->nombre_autor }}
                             </p>
 
                         </div>
                     </div>
 
-                    {{-- Título --}}
+                    {{-- Fecha --}}
                     <div class="col-12">
                         <div class="border rounded-4 p-4 bg-light">
 
                             <div class="d-flex align-items-center gap-2 mb-2">
-                                <i class="bi bi-type-h1 text-primary"></i>
+                                <i class="bi bi-calendar3 text-primary"></i>
 
                                 <h3 class="h6 fw-bold mb-0">
-                                    Título
+                                    Fecha de publicación
                                 </h3>
                             </div>
 
                             <p class="text-secondary mb-0">
-                                El título de la publicación se mostrará aquí.
+                                {{ $publicacion->fecha_publicacion->format('d/m/Y H:i') }}
                             </p>
 
                         </div>
@@ -134,10 +134,8 @@
                                 </h3>
                             </div>
 
-                            <p class="text-secondary mb-0">
-                                El contenido completo de la publicación se mostrará
-                                en esta sección cuando el backend entregue la
-                                información correspondiente.
+                            <p class="text-secondary mb-0" style="white-space: pre-line; line-height: 1.7;">
+                                {{ $publicacion->contenido }}
                             </p>
 
                         </div>
@@ -145,24 +143,41 @@
 
                     {{-- Fotografía --}}
                     <div class="col-12">
-                        <div class="border rounded-4 p-4 text-center bg-light">
+                        @if ($publicacion->fotografia)
+                            <div class="border rounded-4 p-3 text-center bg-light">
 
-                            <div class="mb-3">
-                                <i
-                                    class="bi bi-image text-primary"
-                                    style="font-size: 3rem;"
-                                ></i>
+                                <h3 class="h6 fw-bold mb-3">
+                                    Fotografía de la publicación
+                                </h3>
+
+                                <img
+                                    src="{{ asset('storage/' . $publicacion->fotografia) }}"
+                                    alt="{{ $publicacion->titulo }}"
+                                    class="img-fluid rounded-3"
+                                    style="max-height: 500px; object-fit: contain;"
+                                >
+
                             </div>
+                        @else
+                            <div class="border rounded-4 p-4 text-center bg-light">
 
-                            <h3 class="h6 fw-bold">
-                                Fotografía de la publicación
-                            </h3>
+                                <div class="mb-3">
+                                    <i
+                                        class="bi bi-image text-secondary"
+                                        style="font-size: 3rem;"
+                                    ></i>
+                                </div>
 
-                            <p class="text-secondary mb-0">
-                                La fotografía asociada se mostrará aquí cuando esté disponible.
-                            </p>
+                                <h3 class="h6 fw-bold">
+                                    Sin fotografía
+                                </h3>
 
-                        </div>
+                                <p class="text-secondary mb-0">
+                                    Esta publicación no incluye fotografía.
+                                </p>
+
+                            </div>
+                        @endif
                     </div>
 
                 </div>
@@ -179,7 +194,7 @@
                     </div>
 
                     <span class="text-primary fw-bold fs-5">
-                        {{ $codigoPublicacion }}
+                        {{ $publicacion->codigo_publicacion }}
                     </span>
 
                 </div>
