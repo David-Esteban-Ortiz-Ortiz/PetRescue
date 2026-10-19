@@ -71,6 +71,27 @@
                 </ul>
             </div>
         </div>
+        @auth
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('perfil') }}">
+                    <i class="bi bi-person-circle"></i> Mi Perfil
+                </a>
+            </li>
+            <li class="nav-item">
+                <form action="{{ route('logout') }}" method="POST" class="d-inline">
+                    @csrf
+                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill ms-lg-2">
+                        Cerrar sesión
+                    </button>
+                </form>
+            </li>
+        @else
+            <li class="nav-item">
+                <a class="btn btn-pet-primary btn-sm px-3" href="{{ route('login') }}">
+                    Iniciar sesión
+                </a>
+            </li>
+        @endauth
     </nav>
 
     @if (session('exito'))
