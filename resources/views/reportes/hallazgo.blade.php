@@ -32,7 +32,6 @@
                         <p class="text-secondary mb-0">
                             Registra las características de la mascota y la
                             información relacionada con el hallazgo.
-                            No necesitas crear una cuenta.
                         </p>
                     </div>
 
@@ -308,7 +307,7 @@
                                     class="form-control"
                                     id="ciudad"
                                     name="ciudad"
-                                    value="{{ old('ciudad', 'Pasto') }}"
+                                    value="{{ old('ciudad', auth()->user()->ciudad ?? 'Pasto') }}"
                                     maxlength="100"
                                     required
                                 >
@@ -417,7 +416,7 @@
                                     class="form-control"
                                     id="nombre_contacto"
                                     name="nombre_contacto"
-                                    value="{{ old('nombre_contacto') }}"
+                                    value="{{ old('nombre_contacto', auth()->user()->name ?? '') }}"
                                     placeholder="Nombre de quien reporta"
                                     maxlength="150"
                                     required
@@ -435,7 +434,7 @@
                                     class="form-control"
                                     id="telefono_contacto"
                                     name="telefono_contacto"
-                                    value="{{ old('telefono_contacto') }}"
+                                    value="{{ old('telefono_contacto', auth()->user()->telefono_principal ?? '') }}"
                                     minlength="7"
                                     maxlength="20"
                                     placeholder="Ejemplo: 3114865599"
@@ -453,7 +452,7 @@
                                     class="form-control"
                                     id="correo_contacto"
                                     name="correo_contacto"
-                                    value="{{ old('correo_contacto') }}"
+                                    value="{{ old('correo_contacto', auth()->user()->email ?? '') }}"
                                     maxlength="150"
                                     placeholder="nombre@correo.com"
                                 >
@@ -472,9 +471,9 @@
                                     required
                                 >
                                     <option value="">Seleccione una opción</option>
-                                    <option value="Telefono" {{ old('medio_contacto_preferido') == 'Telefono' ? 'selected' : '' }}>Llamada telefónica</option>
-                                    <option value="WhatsApp" {{ old('medio_contacto_preferido') == 'WhatsApp' ? 'selected' : '' }}>WhatsApp</option>
-                                    <option value="Correo" {{ old('medio_contacto_preferido') == 'Correo' ? 'selected' : '' }}>Correo electrónico</option>
+                                    <option value="Telefono" {{ old('medio_contacto_preferido', auth()->user()->medio_contacto_preferido ?? '') == 'Telefono' ? 'selected' : '' }}>Llamada telefónica</option>
+                                    <option value="WhatsApp" {{ old('medio_contacto_preferido', auth()->user()->medio_contacto_preferido ?? '') == 'WhatsApp' ? 'selected' : '' }}>WhatsApp</option>
+                                    <option value="Correo" {{ old('medio_contacto_preferido', auth()->user()->medio_contacto_preferido ?? '') == 'Correo' ? 'selected' : '' }}>Correo electrónico</option>
                                 </select>
                             </div>
 
