@@ -104,6 +104,8 @@
         </div>
     </div>
 
+    <!-- SECCIÓN DE REPORTES RECIENTES -->
+
     <div
         class="d-flex flex-column flex-md-row
                justify-content-between align-items-md-end
@@ -118,7 +120,7 @@
                 Consulta mascotas perdidas y encontradas.
             </p>
         </div>
-
+        <!-- BUSCADOR DE REPORTES -->
         <div class="col-md-5">
             <label for="buscadorReportes" class="form-label">
                 Buscar reportes
@@ -139,7 +141,10 @@
         </div>
     </div>
 
-    <div class="d-flex flex-wrap gap-2 mb-4">
+    <!-- FILTROS DE REPORTES -->
+
+    <div class="d-flex flex-wrap align-items-center gap-2 mb-4">
+
         <button
             type="button"
             class="btn btn-pet-secondary btn-sm px-4"
@@ -163,11 +168,35 @@
         >
             Mascotas encontradas
         </button>
+
+        <!-- NUEVO FILTRO POR TIPO DE MASCOTA -->
+
+        <div class="d-flex align-items-center gap-2 ms-md-auto">
+
+            <label for="filtroTipo" class="form-label mb-0">
+                Tipo de mascota:
+            </label>
+
+            <select
+                id="filtroTipo"
+                name="tipo"
+                class="form-select"
+            >
+                <option value="">Todos los tipos</option>
+                <option value="perro">Perro</option>
+                <option value="gato">Gato</option>
+            </select>
+
+        </div>
+
     </div>
+
+    <!-- CONTENEDOR DE REPORTES -->
 
     <div class="row g-4" id="contenedorReportes">
 
         @forelse ($reportes as $reporte)
+
             <div
                 class="col-md-6 col-lg-4 reporte-item"
                 data-nombre="{{ strtolower($reporte['nombre']) }}"
@@ -175,6 +204,7 @@
                 data-ubicacion="{{ strtolower($reporte['ubicacion']) }}"
                 data-estado="{{ strtolower($reporte['estado']) }}"
             >
+
                 <article class="card pet-card h-100">
 
                     <img
@@ -186,6 +216,7 @@
                     <div class="card-body d-flex flex-column">
 
                         <div class="d-flex justify-content-between gap-2 mb-2">
+
                             <h3 class="card-title h5 fw-bold mb-0">
                                 {{ $reporte['nombre'] }}
                             </h3>
@@ -198,6 +229,7 @@
                             >
                                 {{ $reporte['estado'] }}
                             </span>
+
                         </div>
 
                         <p class="card-text text-secondary mb-2">
@@ -226,16 +258,21 @@
                     </div>
                 </article>
             </div>
+
         @empty
+
             <div class="col-12">
                 <div class="alert alert-info">
                     <i class="bi bi-info-circle me-2"></i>
                     Todavía no existen reportes publicados.
                 </div>
             </div>
+
         @endforelse
 
     </div>
+
+    <!-- MENSAJE CUANDO NO EXISTEN RESULTADOS -->
 
     <div
         class="alert alert-warning mt-4 d-none"
@@ -249,24 +286,49 @@
 @endsection
 
 @push('scripts')
+
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+
+        // ELEMENTOS DEL BUSCADOR Y FILTROS
+
         const buscador = document.getElementById('buscadorReportes');
+
         const reportes = document.querySelectorAll('.reporte-item');
-        const mensajeSinResultados = document.getElementById('mensajeSinResultados');
+
+        const mensajeSinResultados =
+            document.getElementById('mensajeSinResultados');
+
         const botonesFiltro = document.querySelectorAll('[data-filtro]');
+
+        // NUEVO SELECTOR DE TIPO DE MASCOTA
+
+        const filtroTipo = document.getElementById('filtroTipo');
 
         let filtroActivo = 'todos';
 
+        // FUNCIÓN PARA APLICAR LOS FILTROS
+
         function aplicarFiltros() {
-            const textoBusqueda = buscador ? buscador.value.toLowerCase().trim() : '';
+
+            const textoBusqueda = buscador
+                ? buscador.value.toLowerCase().trim()
+                : '';
+
+            const tipoSeleccionado = filtroTipo
+                ? filtroTipo.value
+                : '';
+
             let resultadosVisibles = 0;
 
             reportes.forEach(function (reporte) {
+
                 const nombre = reporte.dataset.nombre;
                 const tipo = reporte.dataset.tipo;
                 const ubicacion = reporte.dataset.ubicacion;
                 const estado = reporte.dataset.estado;
+
+                // FILTRO POR TEXTO
 
                 const coincideTexto =
                     textoBusqueda === '' ||
@@ -274,33 +336,63 @@
                     tipo.includes(textoBusqueda) ||
                     ubicacion.includes(textoBusqueda);
 
+                // FILTRO POR ESTADO DEL REPORTE
+
                 let coincideFiltro = true;
 
                 if (filtroActivo === 'perdida') {
+
                     coincideFiltro = estado === 'perdida';
+
                 } else if (filtroActivo === 'encontrada') {
+
                     coincideFiltro = estado === 'encontrada';
+
                 }
 
-                if (coincideTexto && coincideFiltro) {
+                // NUEVO FILTRO POR TIPO DE MASCOTA
+
+                const coincideTipo =
+                    tipoSeleccionado === '' ||
+                    tipo === tipoSeleccionado;
+
+                // MOSTRAR O ESCONDER LOS REPORTES
+
+                if (coincideTexto && coincideFiltro && coincideTipo) {
+
                     reporte.classList.remove('d-none');
+
                     resultadosVisibles++;
+
                 } else {
+
                     reporte.classList.add('d-none');
+
                 }
+
             });
 
+            // MOSTRAR MENSAJE SI NO HAY RESULTADOS
+
             if (resultadosVisibles === 0) {
+
                 mensajeSinResultados.classList.remove('d-none');
+
             } else {
                 mensajeSinResultados.classList.add('d-none');
             }
         }
+        // BUSCAR MIENTRAS SE ESCRIBE
 
         if (buscador) {
+
             buscador.addEventListener('input', aplicarFiltros);
         }
-
+        // FILTRAR POR TIPO DE MASCOTA
+        if (filtroTipo) {
+            filtroTipo.addEventListener('change', aplicarFiltros);
+        }
+        // FILTRAR POR ESTADO DEL REPORTE
         botonesFiltro.forEach(function (boton) {
             boton.addEventListener('click', function () {
                 filtroActivo = boton.dataset.filtro;

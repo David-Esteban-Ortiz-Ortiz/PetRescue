@@ -226,4 +226,5 @@
     </div>
 
 </section>
+@include('partials.comentarios', ['publicacion' => $publicacion])
 @endsection
