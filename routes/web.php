@@ -2,7 +2,29 @@
 
 use App\Http\Controllers\PetRescueController;
 use App\Http\Controllers\PublicacionController;
+use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
+
+// Rutas de Autenticación
+Route::get('/login', [AuthController::class, 'mostrarLogin'])
+    ->name('login');
+
+Route::post('/login', [AuthController::class, 'login'])
+    ->name('login.guardar');
+
+Route::post('/logout', [AuthController::class, 'logout'])
+    ->name('logout');
+
+Route::get('/registro', [AuthController::class, 'mostrarRegistro'])
+    ->name('registro');
+
+Route::post('/registro', [AuthController::class, 'registrar'])
+    ->name('registro.guardar');
+
+Route::get('/perfil', [AuthController::class, 'perfil'])
+    ->name('perfil')->middleware('auth');
+
+
 
 Route::get('/', [PetRescueController::class, 'bienvenida'])
     ->name('bienvenida');
@@ -49,4 +71,10 @@ Route::prefix('comunidad')->name('comunidad.')->group(function () {
 
     Route::get('/publicaciones/{codigoPublicacion}', [PublicacionController::class, 'detalle'])
         ->name('detalle');
+});
+
+// Rutas para guardar comentarios
+Route::middleware('auth')->group(function () {
+    Route::post('/publicaciones/{publicacion}/comentarios', [PublicacionController::class, 'guardarComentario'])->name('comentarios.publicacion.guardar');
+    Route::post('/reportes/{reporte}/comentarios', [PetRescueController::class, 'guardarComentario'])->name('comentarios.reporte.guardar');
 });
