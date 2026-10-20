@@ -269,4 +269,6 @@
     </div>
 
 </section>
+@include('partials.comentarios', ['reporte' => $reporte])
 @endsection
+
