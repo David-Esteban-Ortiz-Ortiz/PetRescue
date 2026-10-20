@@ -226,5 +226,53 @@
     </div>
 
 </section>
+
+<hr class="my-5">
+
+<!-- SECCIÓN DE COMENTARIOS -->
+<div class="mt-4 mb-5">
+    <h3 class="h4 fw-bold mb-4">Comentarios ({{ $publicacion->comentarios->count() }})</h3>
+
+    <!-- Lista de comentarios -->
+    <div class="mb-4">
+        @forelse ($publicacion->comentarios as $comentario)
+            <div class="card mb-3 border-0 bg-light rounded-3 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <strong class="text-primary">
+                            <i class="bi bi-person-circle me-1"></i> {{ $comentario->nombre_autor }}
+                        </strong>
+                        <small class="text-muted">{{ $comentario->created_at->diffForHumans() }}</small>
+                    </div>
+                    <p class="mb-0">{{ $comentario->contenido }}</p>
+                </div>
+            </div>
+        @empty
+            <p class="text-secondary">Aún no hay comentarios. ¡Sé el primero en aportar!</p>
+        @endforelse
+    </div>
+
+    <!-- Formulario para comentar -->
+    @auth
+        <form action="{{ route('comentarios.publicacion.guardar', $publicacion->id) }}" method="POST" class="pet-form bg-light rounded-3 border">
+            @csrf
+            <h4 class="h6 fw-bold mb-3">Deja un comentario</h4>
+            @if (session('exito'))
+                <div class="alert alert-success py-2">{{ session('exito') }}</div>
+            @endif
+            <div class="mb-3">
+                <textarea name="contenido" class="form-control" rows="3" placeholder="Escribe tu comentario aquí..." required></textarea>
+            </div>
+            <button type="submit" class="btn btn-pet-primary btn-sm">
+                <i class="bi bi-send-fill me-1"></i> Publicar comentario
+            </button>
+        </form>
+    @else
+        <div class="alert alert-info d-flex align-items-center">
+            <i class="bi bi-info-circle-fill fs-4 me-3"></i>
+            <div>Debes <a href="{{ route('login') }}" class="fw-bold">iniciar sesión</a> para poder comentar.</div>
+        </div>
+    @endauth
+</div>
 @include('partials.comentarios', ['publicacion' => $publicacion])
 @endsection

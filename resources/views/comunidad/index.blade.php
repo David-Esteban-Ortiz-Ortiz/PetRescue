@@ -103,29 +103,29 @@
                     <option value="">
                         Todos los tipos
                     </option>
-
-                    <option value="consejo"
-                        @selected(request('tipo_publicacion') === 'consejo')>
+                    {{-- CORRECCIÓN: Los valores ahora coinciden con la BD (Mayúscula) --}}
+                    <option value="Consejo"
+                        @selected(request('tipo_publicacion') === 'Consejo')>
                         Consejo
                     </option>
 
-                    <option value="historia"
-                        @selected(request('tipo_publicacion') === 'historia')>
+                    <option value="Historia"
+                        @selected(request('tipo_publicacion') === 'Historia')>
                         Historia
                     </option>
 
-                    <option value="experiencia"
-                        @selected(request('tipo_publicacion') === 'experiencia')>
+                    <option value="Experiencia"
+                        @selected(request('tipo_publicacion') === 'Experiencia')>
                         Experiencia
                     </option>
 
-                    <option value="actividad"
-                        @selected(request('tipo_publicacion') === 'actividad')>
+                    <option value="Actividad"
+                        @selected(request('tipo_publicacion') === 'Actividad')>
                         Actividad
                     </option>
 
-                    <option value="informacion"
-                        @selected(request('tipo_publicacion') === 'informacion')>
+                    <option value="Informacion"
+                        @selected(request('tipo_publicacion') === 'Informacion')>
                         Información
                     </option>
 
@@ -198,13 +198,14 @@
 
                 <div
                     class="col-md-6 col-lg-4 publicacion-item"
+                    {{-- CORRECCIÓN: Ahora usa tipo_publicacion en lugar de tipo --}}
                     data-busqueda="{{ trim(
                         ($publicacion->titulo ?? '') . ' ' .
                         ($publicacion->nombre_autor ?? '') . ' ' .
                         ($publicacion->contenido ?? '') . ' ' .
-                        ($publicacion->tipo ?? '')
+                        ($publicacion->tipo_publicacion ?? '')
                     ) }}"
-                    data-tipo="{{ $publicacion->tipo ?? '' }}"
+                    data-tipo="{{ $publicacion->tipo_publicacion ?? '' }}"
                 >
 
                     <article class="card pet-card h-100 border-0">
@@ -222,11 +223,12 @@
                         <div class="card-body d-flex flex-column">
 
                             {{-- TIPO DE PUBLICACIÓN --}}
-                            @if (!empty($publicacion->tipo))
+                            {{-- CORRECCIÓN: Ahora usa tipo_publicacion en lugar de tipo --}}
+                            @if (!empty($publicacion->tipo_publicacion))
                                 <div class="mb-3">
 
                                     <span class="badge rounded-pill bg-primary-subtle text-primary">
-                                        {{ ucfirst($publicacion->tipo) }}
+                                        {{ ucfirst($publicacion->tipo_publicacion) }}
                                     </span>
 
                                 </div>

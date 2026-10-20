@@ -15,23 +15,23 @@ use Throwable;
 
 class PublicacionController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request)
     {
         $query = Publicacion::where('estado', 'Visible');
 
-        // Búsqueda por texto en título o contenido
+        // Filtro por palabra clave (Título o Contenido)
         if ($request->filled('buscar')) {
-            $buscar = $request->input('buscar');
-
-            $query->where(function ($q) use ($buscar) {
-                $q->where('titulo', 'like', '%' . $buscar . '%')
-                    ->orWhere('contenido', 'like', '%' . $buscar . '%');
+            $busqueda = $request->buscar;
+            $query->where(function($q) use ($busqueda) {
+                $q->where('titulo', 'like', '%' . $busqueda . '%')
+                  ->orWhere('contenido', 'like', '%' . $busqueda . '%')
+                  ->orWhere('nombre_autor', 'like', '%' . $busqueda . '%'); // Agregamos autor por si buscan por nombre
             });
         }
 
         // Filtro por tipo de publicación
-        if ($request->filled('tipo')) {
-            $query->where('tipo_publicacion', $request->input('tipo'));
+        if ($request->filled('tipo_publicacion')) {
+            $query->where('tipo_publicacion', $request->tipo_publicacion);
         }
 
         $publicaciones = $query->orderByDesc('fecha_publicacion')->get();
@@ -124,23 +124,19 @@ class PublicacionController extends Controller
         return view('comunidad.detalle', compact('publicacion', 'codigoPublicacion'));
     }
 
-    public function guardarComentario(Request $request, $id): RedirectResponse
+    public function guardarComentario(Request $request, $id)
     {
         $request->validate([
-            'contenido' => ['required', 'string', 'max:500'],
-        ], [
-            'contenido.required' => 'El comentario no puede estar vacío.',
-            'contenido.max'      => 'El comentario no puede superar 500 caracteres.',
+            'contenido' => 'required|string|max:1000'
         ]);
 
         Comentario::create([
             'publicacion_id' => $id,
-            'user_id'        => auth()->id(),
-            // Se adaptará al login
-            'nombre_autor'   => auth()->check() ? auth()->user()->name : 'Anónimo',
-            'contenido'      => $request->input('contenido'),
+            'user_id' => auth()->id(),
+            'nombre_autor' => auth()->user()->name, // Guarda el nombre de quien inició sesión
+            'contenido' => $request->contenido
         ]);
 
-        return back()->with('exito', 'Comentario añadido correctamente.');
+        return back()->with('exito', '¡Comentario publicado!');
     }
 }
