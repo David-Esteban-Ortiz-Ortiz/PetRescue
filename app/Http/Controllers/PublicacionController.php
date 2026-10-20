@@ -15,23 +15,26 @@ use Throwable;
 
 class PublicacionController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): View
     {
         $query = Publicacion::where('estado', 'Visible');
 
-        // Filtro por palabra clave (Título o Contenido)
+        // Búsqueda por texto en título, contenido o autor
         if ($request->filled('buscar')) {
-            $busqueda = $request->buscar;
-            $query->where(function($q) use ($busqueda) {
-                $q->where('titulo', 'like', '%' . $busqueda . '%')
-                  ->orWhere('contenido', 'like', '%' . $busqueda . '%')
-                  ->orWhere('nombre_autor', 'like', '%' . $busqueda . '%'); // Agregamos autor por si buscan por nombre
+            $buscar = $request->input('buscar');
+
+            $query->where(function ($q) use ($buscar) {
+                $q->where('titulo', 'like', '%' . $buscar . '%')
+                    ->orWhere('contenido', 'like', '%' . $buscar . '%')
+                    ->orWhere('nombre_autor', 'like', '%' . $buscar . '%');
             });
         }
 
-        // Filtro por tipo de publicación
-        if ($request->filled('tipo_publicacion')) {
-            $query->where('tipo_publicacion', $request->tipo_publicacion);
+        // Filtro por tipo de publicación (el formulario envía tipo_publicacion; se acepta tipo por compatibilidad)
+        $tipo = $request->input('tipo_publicacion', $request->input('tipo'));
+
+        if (filled($tipo)) {
+            $query->where('tipo_publicacion', $tipo);
         }
 
         $publicaciones = $query->orderByDesc('fecha_publicacion')->get();
@@ -124,17 +127,20 @@ class PublicacionController extends Controller
         return view('comunidad.detalle', compact('publicacion', 'codigoPublicacion'));
     }
 
-    public function guardarComentario(Request $request, $id)
+    public function guardarComentario(Request $request, $id): RedirectResponse
     {
         $request->validate([
-            'contenido' => 'required|string|max:1000'
+            'contenido' => ['required', 'string', 'max:500'],
+        ], [
+            'contenido.required' => 'El comentario no puede estar vacío.',
+            'contenido.max'      => 'El comentario no puede superar 500 caracteres.',
         ]);
 
         Comentario::create([
             'publicacion_id' => $id,
-            'user_id' => auth()->id(),
-            'nombre_autor' => auth()->user()->name, // Guarda el nombre de quien inició sesión
-            'contenido' => $request->contenido
+            'user_id'        => auth()->id(),
+            'nombre_autor'   => auth()->check() ? auth()->user()->name : 'Anónimo',
+            'contenido'      => $request->input('contenido'),
         ]);
 
         return back()->with('exito', '¡Comentario publicado!');
