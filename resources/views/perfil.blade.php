@@ -116,9 +116,9 @@
                     mascotas y reportes activos.
                 </div>
 
-                <form
-                    action="{{ route('perfil.contacto.actualizar') }}"
-                    method="POST"
+                <form action="{{ route('perfil.actualizar') }}" method="POST">
+                    @csrf
+                    @method('PUT')
                 >
                     @csrf
                     @method('PUT')

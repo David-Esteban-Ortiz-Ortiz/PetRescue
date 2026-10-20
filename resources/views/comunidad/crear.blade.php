@@ -46,39 +46,26 @@
                     @csrf
 
                     {{-- Información del autor --}}
-                    <div class="mb-4">
+                    <div class="col-md-6 mb-3">
+                        <label for="nombre_autor" class="form-label">
+                            Nombre del autor
+                            <span class="text-danger">*</span>
+                        </label>
 
-                        <h2 class="h5 fw-bold text-primary mb-3">
-                            <i class="bi bi-person-circle me-2"></i>
-                            Información del autor
-                        </h2>
-
-                        <div class="mb-3">
-
-                            <label for="nombre_autor" class="form-label fw-semibold">
-                                Nombre del autor
-                                <span class="text-danger">*</span>
-                            </label>
-
-                            <input
-                                type="text"
-                                class="form-control rounded-3 @error('nombre_autor') is-invalid @enderror"
-                                id="nombre_autor"
-                                name="nombre_autor"
-                                value="{{ old('nombre_autor') }}"
-                                maxlength="150"
-                                placeholder="Ej: Carlos Pérez"
-                                required
-                            >
-
-                            @error('nombre_autor')
-                                <div class="invalid-feedback">
-                                    {{ $message }}
-                                </div>
-                            @enderror
-
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="nombre_autor"
+                            name="nombre_autor"
+                            value="{{ old('nombre_autor', auth()->user()->name ?? '') }}"
+                            placeholder="Ej: Carlos Pérez"
+                            maxlength="150"
+                            required
+                            readonly
+                        >
+                        <div class="form-text">
+                            Este nombre se toma automáticamente de tu perfil.
                         </div>
-
                     </div>
 
 
