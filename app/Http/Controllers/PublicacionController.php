@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Comentario;
 use App\Models\Publicacion;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,12 +15,26 @@ use Throwable;
 
 class PublicacionController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $publicaciones = Publicacion::where('estado', 'Visible')
-            ->orderByDesc('fecha_publicacion')
-            ->take(20)
-            ->get();
+        $query = Publicacion::where('estado', 'Visible');
+
+        // Búsqueda por texto en título o contenido
+        if ($request->filled('buscar')) {
+            $buscar = $request->input('buscar');
+
+            $query->where(function ($q) use ($buscar) {
+                $q->where('titulo', 'like', '%' . $buscar . '%')
+                    ->orWhere('contenido', 'like', '%' . $buscar . '%');
+            });
+        }
+
+        // Filtro por tipo de publicación
+        if ($request->filled('tipo')) {
+            $query->where('tipo_publicacion', $request->input('tipo'));
+        }
+
+        $publicaciones = $query->orderByDesc('fecha_publicacion')->get();
 
         return view('comunidad.index', compact('publicaciones'));
     }
@@ -107,5 +122,25 @@ class PublicacionController extends Controller
         }
 
         return view('comunidad.detalle', compact('publicacion', 'codigoPublicacion'));
+    }
+
+    public function guardarComentario(Request $request, $id): RedirectResponse
+    {
+        $request->validate([
+            'contenido' => ['required', 'string', 'max:500'],
+        ], [
+            'contenido.required' => 'El comentario no puede estar vacío.',
+            'contenido.max'      => 'El comentario no puede superar 500 caracteres.',
+        ]);
+
+        Comentario::create([
+            'publicacion_id' => $id,
+            'user_id'        => auth()->id(),
+            // Se adaptará al login
+            'nombre_autor'   => auth()->check() ? auth()->user()->name : 'Anónimo',
+            'contenido'      => $request->input('contenido'),
+        ]);
+
+        return back()->with('exito', 'Comentario añadido correctamente.');
     }
 }

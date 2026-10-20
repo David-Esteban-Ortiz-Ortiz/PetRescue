@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Comentario;
 use App\Models\Mascota;
 use App\Models\Reporte;
 use Illuminate\Http\RedirectResponse;
@@ -20,11 +21,31 @@ class PetRescueController extends Controller
         return view('bienvenida');
     }
 
-    public function inicio(): View
+    public function inicio(Request $request): View
     {
-        $reportes = Reporte::with('mascota')
-            ->orderByDesc('fecha_publicacion')
-            ->take(12)
+        $query = Reporte::with('mascota');
+
+        // Búsqueda por barrio, ciudad o nombre de la mascota
+        if ($request->filled('buscar')) {
+            $buscar = $request->input('buscar');
+
+            $query->where(function ($q) use ($buscar) {
+                $q->where('barrio', 'like', '%' . $buscar . '%')
+                    ->orWhere('ciudad', 'like', '%' . $buscar . '%')
+                    ->orWhereHas('mascota', function ($mQuery) use ($buscar) {
+                        $mQuery->where('nombre', 'like', '%' . $buscar . '%');
+                    });
+            });
+        }
+
+        // Filtro por tipo de mascota (Perro, Gato, Otro)
+        if ($request->filled('tipo')) {
+            $query->whereHas('mascota', function ($mQuery) use ($request) {
+                $mQuery->where('tipo', $request->input('tipo'));
+            });
+        }
+
+        $reportes = $query->orderByDesc('fecha_publicacion')
             ->get()
             ->map(function (Reporte $reporte) {
                 $mascota = $reporte->mascota;
@@ -308,6 +329,26 @@ class PetRescueController extends Controller
         }
 
         return view('reportes.detalle', compact('reporte'));
+    }
+
+    public function guardarComentario(Request $request, $id): RedirectResponse
+    {
+        $request->validate([
+            'contenido' => ['required', 'string', 'max:500'],
+        ], [
+            'contenido.required' => 'El comentario no puede estar vacío.',
+            'contenido.max' => 'El comentario no puede superar 500 caracteres.',
+        ]);
+
+        Comentario::create([
+            'reporte_id' => $id,
+            'user_id' => auth()->id(),
+            // Se adaptará al login
+            'nombre_autor' => auth()->check() ? auth()->user()->name : 'Anónimo',
+            'contenido' => $request->input('contenido'),
+        ]);
+
+        return back()->with('exito', 'Comentario añadido correctamente.');
     }
 
     private function crearMascotaYReporte(
