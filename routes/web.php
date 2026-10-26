@@ -3,6 +3,7 @@
 use App\Http\Controllers\PetRescueController;
 use App\Http\Controllers\PublicacionController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AdminController;
 use Illuminate\Support\Facades\Route;
 
 // ==========================================
@@ -42,14 +43,13 @@ Route::middleware('auth')->group(function () {
 
     // Perfil del usuario
     Route::get('/perfil', [AuthController::class, 'perfil'])->name('perfil');
-    // RUTA NUEVA PARA GUARDAR LOS CAMBIOS DEL PERFIL:
     Route::put('/perfil', [AuthController::class, 'actualizarPerfil'])->name('perfil.actualizar');
 
     // Guardar Reportes (HU1 y HU2)
     Route::post('/reportes/perdida', [PetRescueController::class, 'guardarReportePerdida'])->name('reportes.perdida.guardar');
     Route::post('/reportes/hallazgo', [PetRescueController::class, 'guardarReporteHallazgo'])->name('reportes.hallazgo.guardar');
 
-    // Actualizar contacto por código (HU3) - Lo dejamos aquí por seguridad
+    // Actualizar contacto por código (HU3)
     Route::post('/reportes/verificar-codigos', [PetRescueController::class, 'verificarCodigos'])->name('reportes.verificar-codigos');
     Route::put('/reportes/{codigoReporte}/contacto', [PetRescueController::class, 'actualizarContacto'])->name('reportes.contacto.actualizar');
 
@@ -59,5 +59,18 @@ Route::middleware('auth')->group(function () {
     // Guardar Comentarios (HU6)
     Route::post('/publicaciones/{publicacion}/comentarios', [PublicacionController::class, 'guardarComentario'])->name('comentarios.publicacion.guardar');
     Route::post('/reportes/{reporte}/comentarios', [PetRescueController::class, 'guardarComentario'])->name('comentarios.reporte.guardar');
+
+    // ==========================================
+    // RUTAS NUEVAS DEL SPRINT 4 (HU8 y HU9)
+    // ==========================================
+
+    // Panel de Administrador (HU8)
+    Route::prefix('admin')->name('admin.')->group(function () {
+        Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
+        Route::put('/ocultar/{tipo}/{id}', [AdminController::class, 'ocultar'])->name('ocultar');
+    });
+
+    // Resolver Reporte (HU9)
+    Route::put('/reportes/{codigoReporte}/resolver', [PetRescueController::class, 'resolverReporte'])->name('reportes.resolver');
 
 });

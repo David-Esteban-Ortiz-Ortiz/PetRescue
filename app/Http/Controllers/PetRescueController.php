@@ -429,4 +429,11 @@ class PetRescueController extends Controller
 
         return $codigo;
     }
+
+    public function resolverReporte($codigoReporte)
+    {
+        // Juliana llenará esto después
+        return back()->with('exito', 'Reporte marcado como resuelto (Simulado).');
+    }
+
 }
