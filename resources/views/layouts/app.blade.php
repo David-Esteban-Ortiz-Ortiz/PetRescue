@@ -68,6 +68,18 @@
                             Actualizar contacto
                         </a>
                     </li>
+    @auth
+        @if(auth()->user()->role === 'admin')
+                    <li class="nav-item">
+                        <a class="nav-link text-danger fw-bold"
+                            href="{{ route('admin.dashboard') }}">
+                             <i class="bi bi-shield-lock-fill"></i>
+                            Panel Admin
+                        </a>
+                 </li>
+            @endif
+        @endauth
+
                 </ul>
             </div>
         </div>
