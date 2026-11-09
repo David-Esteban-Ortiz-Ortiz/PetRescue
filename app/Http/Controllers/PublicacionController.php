@@ -19,19 +19,22 @@ class PublicacionController extends Controller
     {
         $query = Publicacion::where('estado', 'Visible');
 
-        // Búsqueda por texto en título o contenido
+        // Búsqueda por texto en título, contenido o autor
         if ($request->filled('buscar')) {
             $buscar = $request->input('buscar');
 
             $query->where(function ($q) use ($buscar) {
                 $q->where('titulo', 'like', '%' . $buscar . '%')
-                    ->orWhere('contenido', 'like', '%' . $buscar . '%');
+                    ->orWhere('contenido', 'like', '%' . $buscar . '%')
+                    ->orWhere('nombre_autor', 'like', '%' . $buscar . '%');
             });
         }
 
-        // Filtro por tipo de publicación
-        if ($request->filled('tipo')) {
-            $query->where('tipo_publicacion', $request->input('tipo'));
+        // Filtro por tipo de publicación (el formulario envía tipo_publicacion; se acepta tipo por compatibilidad)
+        $tipo = $request->input('tipo_publicacion', $request->input('tipo'));
+
+        if (filled($tipo)) {
+            $query->where('tipo_publicacion', $tipo);
         }
 
         $publicaciones = $query->orderByDesc('fecha_publicacion')->get();
@@ -136,11 +139,10 @@ class PublicacionController extends Controller
         Comentario::create([
             'publicacion_id' => $id,
             'user_id'        => auth()->id(),
-            // Se adaptará al login
             'nombre_autor'   => auth()->check() ? auth()->user()->name : 'Anónimo',
             'contenido'      => $request->input('contenido'),
         ]);
 
-        return back()->with('exito', 'Comentario añadido correctamente.');
+        return back()->with('exito', '¡Comentario publicado!');
     }
 }

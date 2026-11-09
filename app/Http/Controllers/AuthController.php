@@ -63,6 +63,46 @@ class AuthController extends Controller
         return view('auth.registro');
     }
 
+        public function perfil(): View
+    {
+        return view('perfil');
+    }
+
+    public function actualizarPerfil(Request $request): RedirectResponse
+    {
+        $usuario = Auth::user();
+
+        $datosValidados = $request->validate([
+            'nombre' => ['required', 'string', 'max:150'],
+            'telefono_principal' => ['required', 'string', 'min:7', 'max:20'],
+            'telefono_alternativo' => ['nullable', 'string', 'min:7', 'max:20'],
+            'correo' => ['required', 'email', 'max:150', 'unique:users,email,' . $usuario->id],
+            'ciudad' => ['required', 'string', 'max:100'],
+            'medio_contacto' => ['required', 'in:Telefono,WhatsApp,Correo'],
+            'horario_contacto' => ['nullable', 'string', 'max:100'],
+        ], [
+            'nombre.required' => 'El nombre es obligatorio.',
+            'telefono_principal.required' => 'El teléfono principal es obligatorio.',
+            'correo.required' => 'El correo es obligatorio.',
+            'correo.unique' => 'Este correo ya está en uso por otra cuenta.',
+            'medio_contacto.required' => 'Debes seleccionar un medio de contacto.',
+        ]);
+
+        $usuario->update([
+            'name' => $datosValidados['nombre'],
+            'telefono_principal' => $datosValidados['telefono_principal'],
+            'telefono_alternativo' => $datosValidados['telefono_alternativo'],
+            'email' => $datosValidados['correo'],
+            'ciudad' => $datosValidados['ciudad'],
+            'medio_contacto_preferido' => $datosValidados['medio_contacto'],
+            'horario_contacto' => $datosValidados['horario_contacto'],
+        ]);
+
+        return redirect()
+            ->route('perfil')
+            ->with('exito', 'Tu información de contacto ha sido actualizada correctamente.');
+    }
+
     public function registrar(Request $request): RedirectResponse
     {
         $datosValidados = $request->validate(

@@ -42,4 +42,9 @@ class Publicacion extends Model
         'Visible',
         'Oculta',
     ];
+
+    public function comentarios()
+    {
+        return $this->hasMany(Comentario::class);
+    }
 }
