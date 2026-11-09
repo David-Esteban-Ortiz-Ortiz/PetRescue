@@ -23,6 +23,7 @@ class PetRescueController extends Controller
 
     public function inicio(Request $request): View
     {
+        // CORRECCIÓN: Filtramos para que solo traiga los reportes con estado 'Activo'
         $query = Reporte::with('mascota')->where('estado', 'Activo');
 
         // Búsqueda por barrio, ciudad o nombre de la mascota
@@ -343,7 +344,6 @@ class PetRescueController extends Controller
         Comentario::create([
             'reporte_id' => $id,
             'user_id' => auth()->id(),
-            // Se adaptará al login
             'nombre_autor' => auth()->check() ? auth()->user()->name : 'Anónimo',
             'contenido' => $request->input('contenido'),
         ]);
@@ -388,7 +388,7 @@ class PetRescueController extends Controller
 
                 $reporte = Reporte::create([
                     'mascota_id' => $mascota->id,
-                    'usuario_reportante_id' => null,
+                    'usuario_reportante_id' => auth()->id(),
                     'nombre_contacto' => $datos['nombre_contacto'],
                     'telefono_contacto' => $datos['telefono_contacto'],
                     'correo_contacto' => $datos['correo_contacto'] ?? null,
@@ -434,8 +434,7 @@ class PetRescueController extends Controller
     {
         $reporte = Reporte::where('codigo_reporte', $codigoReporte)->firstOrFail();
 
-        // Validar que solo el creador pueda resolverlo
-        if (auth()->user()->name !== $reporte->nombre_contacto) {
+        if (auth()->id() != $reporte->usuario_reportante_id) {
             return back()->withErrors(['error' => 'No tienes permiso para resolver este reporte.']);
         }
 
@@ -446,5 +445,4 @@ class PetRescueController extends Controller
 
         return back()->with('exito', '¡Felicidades! El reporte ha sido marcado como resuelto y la comunidad ha sido notificada.');
     }
-
 }

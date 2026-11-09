@@ -4,85 +4,20 @@
 
 @section('content')
 <section class="container py-5">
-
-    <h1 class="display-6 fw-bold mb-4">
-        Panel de Administración
-    </h1>
+    <h1 class="display-6 fw-bold mb-4">Panel de Administración</h1>
 
     @if(session('exito'))
         <div class="alert alert-success">
-            {{ session('exito') }}
+            <i class="bi bi-check-circle me-2"></i> {{ session('exito') }}
         </div>
     @endif
 
-    <!-- REPORTES DE MASCOTAS -->
     <div class="card pet-card mb-4">
         <div class="card-header bg-primary text-white">
-            <h2 class="h5 mb-0">Reportes de Mascotas</h2>
+            <h2 class="h5 mb-0">Publicaciones de la Comunidad</h2>
         </div>
-
         <div class="card-body table-responsive">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>Tipo</th>
-                        <th>Mascota</th>
-                        <th>Estado Actual</th>
-                        <th>Acción</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    @forelse($reportes as $reporte)
-                        <tr>
-                            <td>{{ $reporte->tipo_reporte }}</td>
-
-                            <td>
-                                {{ $reporte->mascota->nombre ?? 'Sin nombre' }}
-                            </td>
-
-                            <td>
-                                <span class="badge bg-secondary">
-                                    {{ $reporte->estado }}
-                                </span>
-                            </td>
-
-                            <td>
-                                <form
-                                    action="{{ route('admin.ocultar', ['tipo' => 'reporte', 'id' => $reporte->id]) }}"
-                                    method="POST">
-
-                                    @csrf
-                                    @method('PUT')
-
-                                    <button type="submit" class="btn btn-sm btn-danger">
-                                        Ocultar
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="4" class="text-center">
-                                No hay reportes registrados.
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- PUBLICACIONES DE LA COMUNIDAD -->
-    <div class="card pet-card mb-4">
-        <div class="card-header bg-success text-white">
-            <h2 class="h5 mb-0">
-                Publicaciones de la Comunidad
-            </h2>
-        </div>
-
-        <div class="card-body table-responsive">
-            <table class="table table-hover">
+            <table class="table table-hover align-middle">
                 <thead>
                     <tr>
                         <th>Título</th>
@@ -91,45 +26,40 @@
                         <th>Acción</th>
                     </tr>
                 </thead>
-
                 <tbody>
-                    @forelse($publicaciones as $publicacion)
-                        <tr>
-                            <td>{{ $publicacion->titulo }}</td>
-
-                            <td>{{ $publicacion->nombre_autor }}</td>
-
-                            <td>
-                                <span class="badge bg-secondary">
-                                    {{ $publicacion->estado }}
-                                </span>
-                            </td>
-
-                            <td>
-                                <form
-                                    action="{{ route('admin.ocultar', ['tipo' => 'publicacion', 'id' => $publicacion->id]) }}"
-                                    method="POST">
-
-                                    @csrf
-                                    @method('PUT')
-
-                                    <button type="submit" class="btn btn-sm btn-danger">
-                                        Ocultar
+                    @foreach($publicaciones as $publicacion)
+                    <tr>
+                        <td>{{ $publicacion->titulo }}</td>
+                        <td>{{ $publicacion->nombre_autor }}</td>
+                        <td>
+                            @if($publicacion->estado === 'Visible')
+                                <span class="badge bg-success">Visible</span>
+                            @else
+                                <span class="badge bg-secondary">Oculta</span>
+                            @endif
+                        </td>
+                        <td>
+                            @if($publicacion->estado === 'Visible')
+                                <form action="{{ route('admin.ocultar', ['tipo' => 'publicacion', 'id' => $publicacion->id]) }}" method="POST">
+                                    @csrf @method('PUT')
+                                    <button class="btn btn-sm btn-danger">
+                                        <i class="bi bi-eye-slash"></i> Ocultar
                                     </button>
                                 </form>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="4" class="text-center">
-                                No hay publicaciones registradas.
-                            </td>
-                        </tr>
-                    @endforelse
+                            @else
+                                <form action="{{ route('admin.mostrar', ['tipo' => 'publicacion', 'id' => $publicacion->id]) }}" method="POST">
+                                    @csrf @method('PUT')
+                                    <button class="btn btn-sm btn-success">
+                                        <i class="bi bi-eye"></i> Mostrar
+                                    </button>
+                                </form>
+                            @endif
+                        </td>
+                    </tr>
+                    @endforeach
                 </tbody>
             </table>
         </div>
     </div>
-
 </section>
 @endsection
