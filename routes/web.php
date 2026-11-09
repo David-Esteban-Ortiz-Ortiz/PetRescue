@@ -68,6 +68,9 @@ Route::middleware('auth')->group(function () {
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
         Route::put('/ocultar/{tipo}/{id}', [AdminController::class, 'ocultar'])->name('ocultar');
+
+        // ESTA ES LA RUTA NUEVA:
+        Route::put('/mostrar/{tipo}/{id}', [AdminController::class, 'mostrar'])->name('mostrar');
     });
 
     // Resolver Reporte (HU9)

@@ -252,6 +252,26 @@
 
             </div>
 
+            {{-- ======================================================== --}}
+            {{-- BOTÓN PARA MARCAR COMO RESUELTO (HU9)                    --}}
+            {{-- ======================================================== --}}
+            @auth
+                @if($reporte->estado === 'Activo' && auth()->id() == $reporte->usuario_reportante_id)
+                    <div class="alert alert-success mt-4 text-center rounded-4 border-success shadow-sm">
+                        <i class="bi bi-stars fs-2 text-success mb-2 d-block"></i>
+                        <h4 class="h5 fw-bold">¿Ya se resolvió el caso?</h4>
+                        <p class="mb-3 text-muted">Si ya encontraste a tu mascota o ya la entregaste a su dueño, por favor actualiza el estado para informar a la comunidad.</p>
+                        <form action="{{ route('reportes.resolver', $reporte->codigo_reporte) }}" method="POST">
+                            @csrf
+                            @method('PUT')
+                            <button type="submit" class="btn btn-success rounded-pill px-4">
+                                <i class="bi bi-check-circle-fill me-2"></i> Marcar como Resuelto
+                            </button>
+                        </form>
+                    </div>
+                @endif
+            @endauth
+
             <div class="text-center mt-4 mb-5">
 
                 <a
@@ -269,6 +289,7 @@
     </div>
 
 </section>
-@include('partials.comentarios', ['reporte' => $reporte])
-@endsection
 
+@include('partials.comentarios', ['reporte' => $reporte])
+
+@endsection
