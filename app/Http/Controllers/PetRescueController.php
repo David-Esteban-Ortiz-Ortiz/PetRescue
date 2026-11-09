@@ -23,6 +23,7 @@ class PetRescueController extends Controller
 
     public function inicio(Request $request): View
     {
+        // CORRECCIÓN: Filtramos para que solo traiga los reportes con estado 'Activo'
         $query = Reporte::with('mascota')->where('estado', 'Activo');
 
         // Búsqueda por barrio, ciudad o nombre de la mascota
@@ -84,21 +85,12 @@ class PetRescueController extends Controller
         return view('reportes.perdida');
     }
 
-    public function guardarReportePerdida(Request $request): RedirectResponse
+        public function guardarReportePerdida(Request $request): RedirectResponse
     {
+        // 1. Validamos SOLO los datos de la pérdida y el contacto, además del ID de la mascota
         $datos = $request->validate(
             [
-                'nombre_mascota' => ['required', 'string', 'max:100'],
-                'tipo' => ['required', 'in:Perro,Gato,Otro'],
-                'raza' => ['nullable', 'string', 'max:100'],
-                'color_principal' => ['required', 'string', 'max:100'],
-                'color_secundario' => ['nullable', 'string', 'max:100'],
-                'tamano' => ['required', 'in:Pequeno,Mediano,Grande'],
-                'sexo' => ['nullable', 'in:Macho,Hembra,Desconocido'],
-                'edad_aproximada' => ['nullable', 'string', 'max:50'],
-                'identificacion' => ['nullable', 'string', 'max:150'],
-                'caracteristicas_particulares' => ['required', 'string'],
-                'fotografia' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+                'mascota_id' => ['required', 'exists:mascotas,id'],
                 'fecha_suceso' => ['required', 'date'],
                 'hora_aproximada' => ['nullable'],
                 'ciudad' => ['required', 'string', 'max:100'],
@@ -112,14 +104,7 @@ class PetRescueController extends Controller
                 'confirmar_informacion' => ['accepted'],
             ],
             [
-                'nombre_mascota.required' => 'El nombre de la mascota es obligatorio.',
-                'tipo.required' => 'Debes seleccionar el tipo de mascota.',
-                'color_principal.required' => 'El color principal es obligatorio.',
-                'tamano.required' => 'Debes seleccionar el tamaño.',
-                'caracteristicas_particulares.required' => 'Debes describir las características particulares.',
-                'fotografia.image' => 'La fotografía debe ser una imagen válida.',
-                'fotografia.mimes' => 'La fotografía debe ser JPG, JPEG, PNG o WEBP.',
-                'fotografia.max' => 'La fotografía no puede superar los 4 MB.',
+                'mascota_id.required' => 'Debes seleccionar una mascota registrada.',
                 'fecha_suceso.required' => 'La fecha de pérdida es obligatoria.',
                 'ciudad.required' => 'La ciudad es obligatoria.',
                 'barrio.required' => 'El barrio es obligatorio.',
@@ -127,30 +112,45 @@ class PetRescueController extends Controller
                 'descripcion.required' => 'Debes describir las circunstancias de la pérdida.',
                 'nombre_contacto.required' => 'El nombre de contacto es obligatorio.',
                 'telefono_contacto.required' => 'El teléfono de contacto es obligatorio.',
-                'telefono_contacto.min' => 'El teléfono debe tener al menos 7 caracteres.',
-                'correo_contacto.email' => 'El correo de contacto debe ser válido.',
                 'medio_contacto_preferido.required' => 'Debes indicar el medio de contacto preferido.',
                 'confirmar_informacion.accepted' => 'Debes confirmar que la información es correcta.',
             ]
         );
 
-        $rutaFotografia = null;
+        // 2. Buscamos la mascota seleccionada asegurándonos de que sea del usuario logueado
+        $mascota = Mascota::where('id', $datos['mascota_id'])
+            ->where('propietario_id', auth()->id())
+            ->firstOrFail();
 
-        if ($request->hasFile('fotografia')) {
-            $rutaFotografia = $request->file('fotografia')->store('reportes', 'public');
-        }
+        // 3. Generamos los códigos
+        $codigoEdicionPlano = Str::upper(Str::random(16));
+        $codigoReporte = $this->generarCodigoReporteUnico();
 
-        [$reporte, $codigoEdicionPlano] = $this->crearMascotaYReporte(
-            $datos,
-            $rutaFotografia,
-            'Perdida',
-            null,
-            null
-        );
+        // 4. Creamos el reporte (NOTA: usamos $mascota->id)
+        Reporte::create([
+            'mascota_id' => $mascota->id,
+            'usuario_reportante_id' => auth()->id(),
+            'nombre_contacto' => $datos['nombre_contacto'],
+            'telefono_contacto' => $datos['telefono_contacto'],
+            'correo_contacto' => $datos['correo_contacto'] ?? null,
+            'medio_contacto_preferido' => $datos['medio_contacto_preferido'],
+            'codigo_reporte' => $codigoReporte,
+            'codigo_edicion' => Hash::make($codigoEdicionPlano),
+            'tipo_reporte' => 'Perdida',
+            'fecha_suceso' => $datos['fecha_suceso'],
+            'hora_aproximada' => $datos['hora_aproximada'] ?? null,
+            'ciudad' => $datos['ciudad'],
+            'barrio' => $datos['barrio'],
+            'direccion_referencia' => $datos['direccion_referencia'],
+            'descripcion' => $datos['descripcion'],
+            'estado' => 'Activo',
+            'fecha_publicacion' => now(),
+        ]);
 
+        // 5. Redirigimos a la confirmación con los códigos
         return redirect()
             ->route('reportes.confirmacion')
-            ->with('codigo_reporte_nuevo', $reporte->codigo_reporte)
+            ->with('codigo_reporte_nuevo', $codigoReporte)
             ->with('codigo_edicion_nuevo', $codigoEdicionPlano)
             ->with('exito', 'El reporte de mascota perdida fue registrado correctamente.');
     }
@@ -343,7 +343,6 @@ class PetRescueController extends Controller
         Comentario::create([
             'reporte_id' => $id,
             'user_id' => auth()->id(),
-            // Se adaptará al login
             'nombre_autor' => auth()->check() ? auth()->user()->name : 'Anónimo',
             'contenido' => $request->input('contenido'),
         ]);
@@ -388,7 +387,7 @@ class PetRescueController extends Controller
 
                 $reporte = Reporte::create([
                     'mascota_id' => $mascota->id,
-                    'usuario_reportante_id' => null,
+                    'usuario_reportante_id' => auth()->id(),
                     'nombre_contacto' => $datos['nombre_contacto'],
                     'telefono_contacto' => $datos['telefono_contacto'],
                     'correo_contacto' => $datos['correo_contacto'] ?? null,
@@ -434,8 +433,7 @@ class PetRescueController extends Controller
     {
         $reporte = Reporte::where('codigo_reporte', $codigoReporte)->firstOrFail();
 
-        // Validar que solo el creador pueda resolverlo
-        if (auth()->user()->name !== $reporte->nombre_contacto) {
+        if (auth()->id() != $reporte->usuario_reportante_id) {
             return back()->withErrors(['error' => 'No tienes permiso para resolver este reporte.']);
         }
 
@@ -446,5 +444,4 @@ class PetRescueController extends Controller
 
         return back()->with('exito', '¡Felicidades! El reporte ha sido marcado como resuelto y la comunidad ha sido notificada.');
     }
-
 }

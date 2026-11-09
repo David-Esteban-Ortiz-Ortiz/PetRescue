@@ -65,6 +65,9 @@
                 >
                     @csrf
 
+                    {{-- ========================================== --}}
+                    {{-- SECCIÓN 1: SELECCIÓN DE MASCOTA REGISTRADA --}}
+                    {{-- ========================================== --}}
                     <div class="mb-5">
 
                         <h2 class="h5 fw-bold mb-3">
@@ -72,203 +75,53 @@
                             Información de la mascota
                         </h2>
 
-                        <div class="row">
-
-                            <div class="col-md-6 mb-3">
-                                <label for="nombre_mascota" class="form-label">
-                                    Nombre de la mascota
-                                    <span class="text-danger">*</span>
-                                </label>
-
-                                <input
-                                    type="text"
-                                    class="form-control"
-                                    id="nombre_mascota"
-                                    name="nombre_mascota"
-                                    value="{{ old('nombre_mascota') }}"
-                                    placeholder="Ejemplo: Lulu"
-                                    maxlength="100"
-                                    required
-                                >
+                        @if(auth()->user()->mascotas->isEmpty())
+                            <div class="alert alert-warning">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                Aún no tienes mascotas registradas en tu perfil.
+                                Por favor, <a href="{{ route('mascotas.crear') }}" class="alert-link">regístrala aquí primero</a>
+                                para poder reportar una pérdida.
+                            </div>
+                        @else
+                            <div class="alert alert-info mb-4">
+                                <i class="bi bi-info-circle-fill me-2"></i>
+                                Selecciona la mascota que has perdido. Si no la encuentras en la lista,
+                                <a href="{{ route('mascotas.crear') }}" class="alert-link">regístrala aquí primero</a>.
                             </div>
 
-                            <div class="col-md-6 mb-3">
-                                <label for="tipo" class="form-label">
-                                    Tipo de mascota
-                                    <span class="text-danger">*</span>
-                                </label>
+                            <div class="row">
+                                <div class="col-md-12 mb-3">
+                                    <label for="mascota_id" class="form-label">
+                                        Selecciona tu mascota
+                                        <span class="text-danger">*</span>
+                                    </label>
 
-                                <select
-                                    class="form-select"
-                                    id="tipo"
-                                    name="tipo"
-                                    required
-                                >
-                                    <option value="">Seleccione una opción</option>
-                                    <option value="Perro" {{ old('tipo') == 'Perro' ? 'selected' : '' }}>Perro</option>
-                                    <option value="Gato" {{ old('tipo') == 'Gato' ? 'selected' : '' }}>Gato</option>
-                                    <option value="Otro" {{ old('tipo') == 'Otro' ? 'selected' : '' }}>Otro</option>
-                                </select>
-                            </div>
+                                    <select
+                                        class="form-select"
+                                        id="mascota_id"
+                                        name="mascota_id"
+                                        required
+                                    >
+                                        <option value="">Seleccione la mascota perdida...</option>
 
-                            <div class="col-md-6 mb-3">
-                                <label for="raza" class="form-label">
-                                    Raza
-                                </label>
+                                        @foreach(auth()->user()->mascotas as $mascota)
+                                            <option value="{{ $mascota->id }}" {{ old('mascota_id') == $mascota->id ? 'selected' : '' }}>
+                                                {{ $mascota->nombre }} ({{ $mascota->tipo }} - {{ $mascota->raza ?? 'Sin raza' }})
+                                            </option>
+                                        @endforeach
 
-                                <input
-                                    type="text"
-                                    class="form-control"
-                                    id="raza"
-                                    name="raza"
-                                    value="{{ old('raza') }}"
-                                    placeholder="Ejemplo: Labrador"
-                                    maxlength="100"
-                                >
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label for="color_principal" class="form-label">
-                                    Color principal
-                                    <span class="text-danger">*</span>
-                                </label>
-
-                                <input
-                                    type="text"
-                                    class="form-control"
-                                    id="color_principal"
-                                    name="color_principal"
-                                    value="{{ old('color_principal') }}"
-                                    placeholder="Ejemplo: Dorado"
-                                    maxlength="100"
-                                    required
-                                >
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label for="color_secundario" class="form-label">
-                                    Color secundario
-                                </label>
-
-                                <input
-                                    type="text"
-                                    class="form-control"
-                                    id="color_secundario"
-                                    name="color_secundario"
-                                    value="{{ old('color_secundario') }}"
-                                    placeholder="Ejemplo: Blanco"
-                                    maxlength="100"
-                                >
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label for="tamano" class="form-label">
-                                    Tamaño
-                                    <span class="text-danger">*</span>
-                                </label>
-
-                                <select
-                                    class="form-select"
-                                    id="tamano"
-                                    name="tamano"
-                                    required
-                                >
-                                    <option value="">Seleccione</option>
-                                    <option value="Pequeno" {{ old('tamano') == 'Pequeno' ? 'selected' : '' }}>Pequeño</option>
-                                    <option value="Mediano" {{ old('tamano') == 'Mediano' ? 'selected' : '' }}>Mediano</option>
-                                    <option value="Grande" {{ old('tamano') == 'Grande' ? 'selected' : '' }}>Grande</option>
-                                </select>
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label for="sexo" class="form-label">
-                                    Sexo
-                                </label>
-
-                                <select
-                                    class="form-select"
-                                    id="sexo"
-                                    name="sexo"
-                                >
-                                    <option value="">Seleccione</option>
-                                    <option value="Macho" {{ old('sexo') == 'Macho' ? 'selected' : '' }}>Macho</option>
-                                    <option value="Hembra" {{ old('sexo') == 'Hembra' ? 'selected' : '' }}>Hembra</option>
-                                    <option value="Desconocido" {{ old('sexo') == 'Desconocido' ? 'selected' : '' }}>Desconocido</option>
-                                </select>
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label for="edad_aproximada" class="form-label">
-                                    Edad aproximada
-                                </label>
-
-                                <input
-                                    type="text"
-                                    class="form-control"
-                                    id="edad_aproximada"
-                                    name="edad_aproximada"
-                                    value="{{ old('edad_aproximada') }}"
-                                    placeholder="Ejemplo: 3 años"
-                                    maxlength="50"
-                                >
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label for="identificacion" class="form-label">
-                                    Placa o microchip
-                                </label>
-
-                                <input
-                                    type="text"
-                                    class="form-control"
-                                    id="identificacion"
-                                    name="identificacion"
-                                    value="{{ old('identificacion') }}"
-                                    placeholder="Número o información disponible"
-                                    maxlength="150"
-                                >
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label for="fotografia" class="form-label">
-                                    Fotografía de la mascota
-                                </label>
-
-                                <input
-                                    type="file"
-                                    class="form-control"
-                                    id="fotografia"
-                                    name="fotografia"
-                                    accept=".jpg,.jpeg,.png,.webp"
-                                >
-
-                                <div class="form-text">
-                                    Formatos permitidos: JPG, JPEG, PNG o WEBP. Tamaño máximo: 4 MB.
+                                    </select>
                                 </div>
                             </div>
-
-                            <div class="col-12 mb-3">
-                                <label for="caracteristicas_particulares" class="form-label">
-                                    Características particulares
-                                    <span class="text-danger">*</span>
-                                </label>
-
-                                <textarea
-                                    class="form-control"
-                                    id="caracteristicas_particulares"
-                                    name="caracteristicas_particulares"
-                                    rows="3"
-                                    placeholder="Describe manchas, cicatrices, color del collar u otras características"
-                                    required
-                                >{{ old('caracteristicas_particulares') }}</textarea>
-                            </div>
-
-                        </div>
+                        @endif
 
                     </div>
 
                     <hr class="mb-5">
 
+                    {{-- ========================================== --}}
+                    {{-- SECCIÓN 2: INFORMACIÓN DE LA PÉRDIDA       --}}
+                    {{-- ========================================== --}}
                     <div class="mb-5">
 
                         <h2 class="h5 fw-bold mb-3">
@@ -383,6 +236,9 @@
 
                     <hr class="mb-5">
 
+                    {{-- ========================================== --}}
+                    {{-- SECCIÓN 3: INFORMACIÓN DE CONTACTO         --}}
+                    {{-- ========================================== --}}
                     <div class="mb-4">
 
                         <h2 class="h5 fw-bold mb-3">
@@ -499,6 +355,7 @@
                         <button
                             type="submit"
                             class="btn btn-pet-primary"
+                            {{ auth()->user()->mascotas->isEmpty() ? 'disabled' : '' }}
                         >
                             <i class="bi bi-send-fill me-1"></i>
                             Publicar reporte
