@@ -8,7 +8,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Throwable;
@@ -19,10 +18,8 @@ class PublicacionController extends Controller
     {
         $query = Publicacion::where('estado', 'Visible');
 
-        // Búsqueda por texto en título, contenido o autor
         if ($request->filled('buscar')) {
             $buscar = $request->input('buscar');
-
             $query->where(function ($q) use ($buscar) {
                 $q->where('titulo', 'like', '%' . $buscar . '%')
                     ->orWhere('contenido', 'like', '%' . $buscar . '%')
@@ -30,7 +27,6 @@ class PublicacionController extends Controller
             });
         }
 
-        // Filtro por tipo de publicación (el formulario envía tipo_publicacion; se acepta tipo por compatibilidad)
         $tipo = $request->input('tipo_publicacion', $request->input('tipo'));
 
         if (filled($tipo)) {
@@ -49,7 +45,6 @@ class PublicacionController extends Controller
 
     public function guardar(Request $request): RedirectResponse
     {
-        // 1. Validación
         $datos = $request->validate([
             'nombre_autor'     => ['required', 'string', 'max:150'],
             'titulo'           => ['required', 'string', 'max:150'],
@@ -69,7 +64,6 @@ class PublicacionController extends Controller
             'fotografia.max'            => 'La fotografía no puede superar los 4 MB.',
         ]);
 
-        // 2. Guardar fotografía (ruta relativa, ej: publicaciones/abc123.jpg)
         $rutaFotografia = null;
 
         if ($request->hasFile('fotografia')) {
@@ -79,14 +73,9 @@ class PublicacionController extends Controller
         try {
             DB::beginTransaction();
 
-            // 3. Código único PUB-XXXXXXXX
-            do {
-                $codigo = 'PUB-' . strtoupper(Str::random(8));
-            } while (Publicacion::where('codigo_publicacion', $codigo)->exists());
-
-            // 4. Crear el registro
-            Publicacion::create([
-                'codigo_publicacion' => $codigo,
+            // Creamos el registro y lo guardamos en una variable para obtener su ID
+            $publicacion = Publicacion::create([
+                'user_id'            => auth()->id(), // <-- GUARDAMOS EL DUEÑO
                 'nombre_autor'       => $datos['nombre_autor'],
                 'titulo'             => $datos['titulo'],
                 'tipo_publicacion'   => $datos['tipo_publicacion'],
@@ -100,7 +89,6 @@ class PublicacionController extends Controller
         } catch (Throwable $e) {
             DB::rollBack();
 
-            // Si falla la BD, se borra la foto que ya se había subido
             if ($rutaFotografia) {
                 Storage::disk('public')->delete($rutaFotografia);
             }
@@ -108,23 +96,40 @@ class PublicacionController extends Controller
             throw $e;
         }
 
-        // 5. Redirigir al detalle
+        // Redirigimos usando el ID de la publicación recién creada
         return redirect()
-            ->route('comunidad.detalle', $codigo)
+            ->route('comunidad.detalle', $publicacion->id)
             ->with('exito', 'Publicación creada correctamente.');
     }
 
-    public function detalle(string $codigoPublicacion): View|RedirectResponse
+    public function detalle($id): View|RedirectResponse
     {
-        $publicacion = Publicacion::where('codigo_publicacion', $codigoPublicacion)->first();
+        $publicacion = Publicacion::with('comentarios.user')->find($id);
 
-        if (! $publicacion) {
-            return redirect()
-                ->route('comunidad.index')
-                ->withErrors(['publicacion' => 'La publicación solicitada no existe.']);
+        if (!$publicacion) {
+            return redirect()->route('comunidad.index')->withErrors(['error' => 'La publicación no existe.']);
         }
 
-        return view('comunidad.detalle', compact('publicacion', 'codigoPublicacion'));
+        return view('comunidad.detalle', compact('publicacion'));
+    }
+
+    public function eliminar($id): RedirectResponse
+    {
+        $publicacion = Publicacion::findOrFail($id);
+
+        // Verificar que el usuario actual sea el dueño
+        if (auth()->id() !== $publicacion->user_id) {
+            return back()->withErrors(['error' => 'No tienes permiso para eliminar esta publicación.']);
+        }
+
+        // Borrar la foto del almacenamiento si existe
+        if ($publicacion->fotografia) {
+            Storage::disk('public')->delete($publicacion->fotografia);
+        }
+
+        $publicacion->delete();
+
+        return redirect()->route('comunidad.index')->with('exito', 'Publicación eliminada correctamente.');
     }
 
     public function guardarComentario(Request $request, $id): RedirectResponse
@@ -138,7 +143,7 @@ class PublicacionController extends Controller
 
         Comentario::create([
             'publicacion_id' => $id,
-            'user_id'        => auth()->id(),
+            'user_id'        => auth()->id(), // <-- GUARDAMOS EL DUEÑO DEL COMENTARIO
             'nombre_autor'   => auth()->check() ? auth()->user()->name : 'Anónimo',
             'contenido'      => $request->input('contenido'),
         ]);

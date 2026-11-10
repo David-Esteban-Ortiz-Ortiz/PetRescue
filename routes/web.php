@@ -8,28 +8,29 @@ use App\Http\Controllers\MascotaController;
 use Illuminate\Support\Facades\Route;
 
 // ==========================================
-// RUTAS PÚBLICAS
+// RUTAS PÚBLICAS (Cualquiera puede verlas)
 // ==========================================
 
 Route::get('/', [PetRescueController::class, 'bienvenida'])->name('bienvenida');
 Route::get('/inicio', [PetRescueController::class, 'inicio'])->name('inicio');
 
+// Autenticación
 Route::get('/login', [AuthController::class, 'mostrarLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.guardar');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/registro', [AuthController::class, 'mostrarRegistro'])->name('registro');
 Route::post('/registro', [AuthController::class, 'registrar'])->name('registro.guardar');
 
+// Reportes (Vistas)
 Route::get('/reportes/perdida', [PetRescueController::class, 'crearReportePerdida'])->name('reportes.perdida');
 Route::get('/reportes/hallazgo', [PetRescueController::class, 'crearReporteHallazgo'])->name('reportes.hallazgo');
-Route::get('/reportes/confirmacion', [PetRescueController::class, 'mostrarConfirmacion'])->name('reportes.confirmacion');
-Route::get('/reportes/actualizar-contacto', [PetRescueController::class, 'mostrarFormularioActualizarContacto'])->name('reportes.actualizar-contacto');
-Route::get('/reportes/{codigoReporte}', [PetRescueController::class, 'mostrarReporte'])->name('reportes.detalle');
+Route::get('/reportes/{id}', [PetRescueController::class, 'mostrarReporte'])->name('reportes.detalle');
 
+// Comunidad (Vistas)
 Route::prefix('comunidad')->name('comunidad.')->group(function () {
     Route::get('/', [PublicacionController::class, 'index'])->name('index');
     Route::get('/publicar', [PublicacionController::class, 'crear'])->name('crear');
-    Route::get('/publicaciones/{codigoPublicacion}', [PublicacionController::class, 'detalle'])->name('detalle');
+    Route::get('/publicaciones/{id}', [PublicacionController::class, 'detalle'])->name('detalle');
 });
 
 
@@ -39,30 +40,33 @@ Route::prefix('comunidad')->name('comunidad.')->group(function () {
 
 Route::middleware('auth')->group(function () {
 
-    // Perfil
+    // Perfil de Usuario
     Route::get('/perfil', [AuthController::class, 'perfil'])->name('perfil');
     Route::put('/perfil', [AuthController::class, 'actualizarPerfil'])->name('perfil.actualizar');
 
-    // Reportes
+    // Acciones de Reportes (Guardar y Resolver)
     Route::post('/reportes/perdida', [PetRescueController::class, 'guardarReportePerdida'])->name('reportes.perdida.guardar');
     Route::post('/reportes/hallazgo', [PetRescueController::class, 'guardarReporteHallazgo'])->name('reportes.hallazgo.guardar');
-    Route::post('/reportes/verificar-codigos', [PetRescueController::class, 'verificarCodigos'])->name('reportes.verificar-codigos');
-    Route::put('/reportes/{codigoReporte}/contacto', [PetRescueController::class, 'actualizarContacto'])->name('reportes.contacto.actualizar');
-    Route::put('/reportes/{codigoReporte}/resolver', [PetRescueController::class, 'resolverReporte'])->name('reportes.resolver');
+    Route::put('/reportes/{id}/resolver', [PetRescueController::class, 'resolverReporte'])->name('reportes.resolver');
 
-    // Comunidad
+    // Comentarios en Reportes
+    Route::post('/reportes/{id}/comentarios', [PetRescueController::class, 'guardarComentario'])->name('comentarios.reporte.guardar');
+
+    // Acciones de Comunidad (Guardar y Eliminar)
     Route::post('/comunidad/publicaciones', [PublicacionController::class, 'guardar'])->name('comunidad.guardar');
-    Route::post('/publicaciones/{publicacion}/comentarios', [PublicacionController::class, 'guardarComentario'])->name('comentarios.publicacion.guardar');
-    Route::post('/reportes/{reporte}/comentarios', [PetRescueController::class, 'guardarComentario'])->name('comentarios.reporte.guardar');
+    Route::delete('/comunidad/publicaciones/{id}', [PublicacionController::class, 'eliminar'])->name('comunidad.eliminar');
 
-    // Admin
+    // Comentarios en Publicaciones
+    Route::post('/publicaciones/{id}/comentarios', [PublicacionController::class, 'guardarComentario'])->name('comentarios.publicacion.guardar');
+
+    // Panel de Administrador (HU8)
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
         Route::put('/ocultar/{tipo}/{id}', [AdminController::class, 'ocultar'])->name('ocultar');
         Route::put('/mostrar/{tipo}/{id}', [AdminController::class, 'mostrar'])->name('mostrar');
     });
 
-    // Mascotas
+    // Mascotas (Requerimiento del profesor)
     Route::get('/mis-mascotas', [MascotaController::class, 'index'])->name('mascotas.index');
     Route::get('/mis-mascotas/crear', [MascotaController::class, 'crear'])->name('mascotas.crear');
     Route::post('/mis-mascotas', [MascotaController::class, 'guardar'])->name('mascotas.guardar');
