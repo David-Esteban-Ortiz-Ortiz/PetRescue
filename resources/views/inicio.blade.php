@@ -77,33 +77,6 @@
 
     </div>
 
-    <div class="row g-4 mb-5">
-        <div class="col-12">
-            <div class="pet-card bg-white p-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
-                <div class="d-flex align-items-center gap-3">
-                    <i class="bi bi-pencil-square fs-1 text-primary"></i>
-                    <div>
-                        <h2 class="h5 fw-bold mb-1">
-                            ¿Ya publicaste un reporte?
-                        </h2>
-                        <p class="text-secondary mb-0">
-                            Actualiza la información de contacto de tu reporte
-                            usando tus códigos.
-                        </p>
-                    </div>
-                </div>
-
-                <a
-                    href="{{ route('reportes.actualizar-contacto') }}"
-                    class="btn btn-pet-secondary rounded-pill px-4"
-                >
-                    <i class="bi bi-shield-lock me-1"></i>
-                    Actualizar información de contacto
-                </a>
-            </div>
-        </div>
-    </div>
-
     <!-- SECCIÓN DE REPORTES RECIENTES -->
 
     <div
@@ -248,7 +221,7 @@
                         </p>
 
                         <a
-                            href="{{ route('reportes.detalle', $reporte['codigo_reporte']) }}"
+                            href="{{ route('reportes.detalle', $reporte['id']) }}"
                             class="btn btn-pet-secondary btn-sm mt-auto"
                         >
                             <i class="bi bi-eye me-1"></i>

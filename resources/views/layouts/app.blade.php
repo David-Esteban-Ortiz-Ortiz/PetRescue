@@ -54,7 +54,6 @@
                             Reportar pérdida
                         </a>
                     </li>
-
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('reportes.hallazgo') }}">
                             <i class="bi bi-geo-alt"></i>
@@ -62,15 +61,7 @@
                         </a>
                     </li>
 
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('reportes.actualizar-contacto') }}">
-                            <i class="bi bi-pencil-square"></i>
-                            Actualizar contacto
-                        </a>
-                    </li>
-
                     @auth
-                        {{-- ENLACE NUEVO DE MIS MASCOTAS --}}
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('mascotas.index') }}">
                                 <i class="bi bi-paw"></i> Mis Mascotas
@@ -85,11 +76,25 @@
                             </li>
                         @endif
 
+                        {{-- PERFIL CON FOTO EN EL NAVBAR --}}
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ route('perfil') }}">
-                                <i class="bi bi-person-circle"></i> Mi Perfil
+                            <a class="nav-link d-flex align-items-center gap-2" href="{{ route('perfil') }}">
+                                @if(auth()->user()->avatar)
+                                    <img
+                                        src="{{ asset('storage/' . auth()->user()->avatar) }}"
+                                        alt="Perfil"
+                                        class="rounded-circle border border-2 border-primary"
+                                        width="30"
+                                        height="30"
+                                        style="object-fit: cover;"
+                                    >
+                                @else
+                                    <i class="bi bi-person-circle fs-5"></i>
+                                @endif
+                                Mi Perfil
                             </a>
                         </li>
+
                         <li class="nav-item">
                             <form action="{{ route('logout') }}" method="POST" class="d-inline">
                                 @csrf
