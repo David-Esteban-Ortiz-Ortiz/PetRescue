@@ -11,11 +11,24 @@
 
             <div class="pet-card bg-white p-4 text-center">
 
-                <img
-                    src="{{ asset('images/icono-petrescue.png') }}"
-                    alt="Icono de PetRescue"
-                    width="120"
-                >
+                {{-- LÓGICA PARA MOSTRAR EL AVATAR --}}
+                @if(auth()->user()->avatar)
+                    <img
+                        src="{{ asset('storage/' . auth()->user()->avatar) }}"
+                        alt="Foto de perfil"
+                        width="120"
+                        height="120"
+                        class="rounded-circle mb-3 object-fit-cover shadow-sm"
+                        style="object-fit: cover;"
+                    >
+                @else
+                    <img
+                        src="{{ asset('images/icono-petrescue.png') }}"
+                        alt="Icono de PetRescue"
+                        width="120"
+                        class="mb-3"
+                    >
+                @endif
 
                 <h2 class="h4 fw-bold mt-3 mb-1">
                     {{ auth()->user()->name ?? 'Usuario' }}
@@ -33,60 +46,38 @@
                 <hr>
 
                 <div class="text-start">
-
                     <p class="mb-2">
                         <i class="bi bi-person-fill text-primary me-2"></i>
                         {{ auth()->user()->name ?? 'Usuario' }}
                     </p>
-
                     <p class="mb-2">
                         <i class="bi bi-envelope-fill text-primary me-2"></i>
                         {{ auth()->user()->email ?? 'correo@ejemplo.com' }}
                     </p>
-
                     <p class="mb-0">
                         <i class="bi bi-telephone-fill text-primary me-2"></i>
                         {{ auth()->user()->telefono_principal ?? 'Sin teléfono' }}
                     </p>
-
                 </div>
 
             </div>
 
             <div class="pet-card bg-white p-4 mt-4">
-
                 <h2 class="h5 fw-bold mb-3">
                     Accesos rápidos
                 </h2>
 
                 <div class="d-grid gap-2">
-
-                    <a
-                        href="{{ route('reportes.perdida') }}"
-                        class="btn btn-pet-secondary"
-                    >
-                        <i class="bi bi-search-heart me-1"></i>
-                        Reportar pérdida
+                    <a href="{{ route('reportes.perdida') }}" class="btn btn-pet-secondary">
+                        <i class="bi bi-search-heart me-1"></i> Reportar pérdida
                     </a>
-
-                    <a
-                        href="{{ route('reportes.hallazgo') }}"
-                        class="btn btn-pet-primary"
-                    >
-                        <i class="bi bi-geo-alt-fill me-1"></i>
-                        Reportar hallazgo
+                    <a href="{{ route('reportes.hallazgo') }}" class="btn btn-pet-primary">
+                        <i class="bi bi-geo-alt-fill me-1"></i> Reportar hallazgo
                     </a>
-
-                    <a
-                        href="{{ route('inicio') }}"
-                        class="btn btn-outline-secondary rounded-pill"
-                    >
-                        <i class="bi bi-house-door me-1"></i>
-                        Volver al inicio
+                    <a href="{{ route('inicio') }}" class="btn btn-outline-secondary rounded-pill">
+                        <i class="bi bi-house-door me-1"></i> Volver al inicio
                     </a>
-
                 </div>
-
             </div>
 
         </div>
@@ -116,10 +107,8 @@
                     mascotas y reportes activos.
                 </div>
 
-                <form action="{{ route('perfil.actualizar') }}" method="POST">
-                    @csrf
-                    @method('PUT')
-                >
+                {{-- FORMULARIO CORREGIDO CON ENCTYPE --}}
+                <form action="{{ route('perfil.actualizar') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
 
@@ -127,6 +116,13 @@
                         <i class="bi bi-person-fill text-primary me-2"></i>
                         Información personal
                     </h3>
+
+                    {{-- NUEVO CAMPO PARA LA FOTO --}}
+                    <div class="mb-4 p-3 bg-light rounded-3 border">
+                        <label for="avatar" class="form-label fw-bold">Foto de perfil</label>
+                        <input type="file" name="avatar" class="form-control" accept="image/*">
+                        <div class="form-text">Formatos permitidos: JPG, JPEG, PNG. Tamaño máximo: 2 MB.</div>
+                    </div>
 
                     <div class="mb-3">
                         <label for="nombre" class="form-label">
@@ -149,10 +145,7 @@
                     <div class="row">
 
                         <div class="col-md-6 mb-3">
-                            <label
-                                for="telefono_principal"
-                                class="form-label"
-                            >
+                            <label for="telefono_principal" class="form-label">
                                 Teléfono principal
                                 <span class="text-danger">*</span>
                             </label>
@@ -171,10 +164,7 @@
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label
-                                for="telefono_alternativo"
-                                class="form-label"
-                            >
+                            <label for="telefono_alternativo" class="form-label">
                                 Teléfono alternativo
                             </label>
 
@@ -230,10 +220,7 @@
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label
-                                for="medio_contacto"
-                                class="form-label"
-                            >
+                            <label for="medio_contacto" class="form-label">
                                 Medio de contacto preferido
                                 <span class="text-danger">*</span>
                             </label>
@@ -244,28 +231,14 @@
                                 name="medio_contacto"
                                 required
                             >
-                                <option value="">
-                                    Seleccione una opción
-                                </option>
-
-                                <option
-                                    value="Telefono"
-                                    {{ old('medio_contacto', auth()->user()->medio_contacto_preferido ?? '') == 'Telefono' ? 'selected' : '' }}
-                                >
+                                <option value="">Seleccione una opción</option>
+                                <option value="Telefono" {{ old('medio_contacto', auth()->user()->medio_contacto_preferido ?? '') == 'Telefono' ? 'selected' : '' }}>
                                     Llamada telefónica
                                 </option>
-
-                                <option
-                                    value="WhatsApp"
-                                    {{ old('medio_contacto', auth()->user()->medio_contacto_preferido ?? '') == 'WhatsApp' ? 'selected' : '' }}
-                                >
+                                <option value="WhatsApp" {{ old('medio_contacto', auth()->user()->medio_contacto_preferido ?? '') == 'WhatsApp' ? 'selected' : '' }}>
                                     WhatsApp
                                 </option>
-
-                                <option
-                                    value="Correo"
-                                    {{ old('medio_contacto', auth()->user()->medio_contacto_preferido ?? '') == 'Correo' ? 'selected' : '' }}
-                                >
+                                <option value="Correo" {{ old('medio_contacto', auth()->user()->medio_contacto_preferido ?? '') == 'Correo' ? 'selected' : '' }}>
                                     Correo electrónico
                                 </option>
                             </select>
@@ -274,10 +247,7 @@
                     </div>
 
                     <div class="mb-4">
-                        <label
-                            for="horario_contacto"
-                            class="form-label"
-                        >
+                        <label for="horario_contacto" class="form-label">
                             Horario de contacto
                         </label>
 
@@ -305,37 +275,24 @@
                             required
                         >
 
-                        <label
-                            class="form-check-label"
-                            for="confirmar_datos"
-                        >
-                            Confirmo que los datos de contacto ingresados
-                            están actualizados.
+                        <label class="form-check-label" for="confirmar_datos">
+                            Confirmo que los datos de contacto ingresados están actualizados.
                         </label>
                     </div>
 
                     <div class="d-flex flex-column flex-sm-row gap-3">
 
-                        <button
-                            type="submit"
-                            class="btn btn-pet-primary"
-                        >
+                        <button type="submit" class="btn btn-pet-primary">
                             <i class="bi bi-floppy-fill me-1"></i>
                             Guardar cambios
                         </button>
 
-                        <button
-                            type="reset"
-                            class="btn btn-outline-warning rounded-pill"
-                        >
+                        <button type="reset" class="btn btn-outline-warning rounded-pill">
                             <i class="bi bi-arrow-counterclockwise me-1"></i>
                             Restablecer
                         </button>
 
-                        <a
-                            href="{{ route('inicio') }}"
-                            class="btn btn-outline-secondary rounded-pill"
-                        >
+                        <a href="{{ route('inicio') }}" class="btn btn-outline-secondary rounded-pill">
                             <i class="bi bi-x-circle me-1"></i>
                             Cancelar
                         </a>

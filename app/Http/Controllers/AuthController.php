@@ -80,15 +80,10 @@ class AuthController extends Controller
             'ciudad' => ['required', 'string', 'max:100'],
             'medio_contacto' => ['required', 'in:Telefono,WhatsApp,Correo'],
             'horario_contacto' => ['nullable', 'string', 'max:100'],
-        ], [
-            'nombre.required' => 'El nombre es obligatorio.',
-            'telefono_principal.required' => 'El teléfono principal es obligatorio.',
-            'correo.required' => 'El correo es obligatorio.',
-            'correo.unique' => 'Este correo ya está en uso por otra cuenta.',
-            'medio_contacto.required' => 'Debes seleccionar un medio de contacto.',
+            'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'], // Nueva validación
         ]);
 
-        $usuario->update([
+        $datosParaActualizar = [
             'name' => $datosValidados['nombre'],
             'telefono_principal' => $datosValidados['telefono_principal'],
             'telefono_alternativo' => $datosValidados['telefono_alternativo'],
@@ -96,11 +91,21 @@ class AuthController extends Controller
             'ciudad' => $datosValidados['ciudad'],
             'medio_contacto_preferido' => $datosValidados['medio_contacto'],
             'horario_contacto' => $datosValidados['horario_contacto'],
-        ]);
+        ];
+
+        // Si el usuario subió una foto, la guardamos
+        if ($request->hasFile('avatar')) {
+            if ($usuario->avatar) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($usuario->avatar);
+            }
+            $datosParaActualizar['avatar'] = $request->file('avatar')->store('avatars', 'public');
+        }
+
+        $usuario->update($datosParaActualizar);
 
         return redirect()
-            ->route('perfil')
-            ->with('exito', 'Tu información de contacto ha sido actualizada correctamente.');
+        ->route('perfil')
+        ->with('exito', 'Tu información ha sido actualizada correctamente.');
     }
 
     public function registrar(Request $request): RedirectResponse

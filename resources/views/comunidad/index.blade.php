@@ -257,11 +257,11 @@
                             @endif
 
                             {{-- BOTÓN DE DETALLE --}}
-                            @if (!empty($publicacion->codigo_publicacion))
+                            @if (!empty($publicacion->id))
                                 <div class="mt-auto">
 
                                     <a
-                                        href="{{ route('comunidad.detalle', $publicacion->codigo_publicacion) }}"
+                                        href="{{ route('comunidad.detalle', $publicacion->id) }}"
                                         class="btn btn-outline-primary rounded-pill w-100"
                                     >
                                         Ver publicación

@@ -12,7 +12,7 @@ class Publicacion extends Model
     protected $table = 'publicaciones';
 
     protected $fillable = [
-        'codigo_publicacion',
+        'user_id',
         'nombre_autor',
         'titulo',
         'tipo_publicacion',
@@ -46,5 +46,10 @@ class Publicacion extends Model
     public function comentarios()
     {
         return $this->hasMany(Comentario::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 }
